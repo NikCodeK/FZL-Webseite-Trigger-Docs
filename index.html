@@ -311,21 +311,41 @@
                     })
                 });
 
-                const result = await response.json();
+                // Check if response has content before parsing JSON
+                const responseText = await response.text();
+                console.log('Raw Response:', responseText);
+                
+                let result;
+                try {
+                    result = responseText ? JSON.parse(responseText) : {};
+                } catch (parseError) {
+                    console.log('JSON Parse Error:', parseError);
+                    result = { status: 'success', message: 'Daten empfangen' };
+                }
                 
                 // Debug: Zeige was n8n zurückgibt
                 console.log('n8n Response:', result);
                 console.log('Response Status:', response.status);
                 console.log('Response OK:', response.ok);
-                console.log('Response Headers:', response.headers);
 
                 if (response.ok) {
-                    // Simple success - n8n received the data successfully
-                    showSuccess({
-                        status: 'success',
-                        message: 'Daten erfolgreich an n8n gesendet',
-                        processing_time: 'Verarbeitung läuft...'
-                    });
+                    // Handle different response formats
+                    if (result.status === 'success') {
+                        showSuccess(result);
+                    } else if (result.message) {
+                        showSuccess({
+                            status: 'success',
+                            message: result.message,
+                            processing_time: result.processing_time || 'Verarbeitung läuft...'
+                        });
+                    } else {
+                        // Fallback for any successful response
+                        showSuccess({
+                            status: 'success',
+                            message: 'Daten erfolgreich an n8n gesendet',
+                            processing_time: 'Verarbeitung läuft...'
+                        });
+                    }
                 } else {
                     console.log('Error Details:', {
                         responseOk: response.ok,
