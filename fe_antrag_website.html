@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F&E-Förderantrag Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #1e293b;
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1e293b;
+            box-shadow: 0 0 0 4px rgba(30, 41, 59, 0.15);
+            background: white;
+            transform: translateY(-1px);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 200px;
+            font-family: inherit;
+        }
+
+
+        .submit-btn {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 25px;
+            box-shadow: 0 4px 15px rgba(30, 41, 59, 0.3);
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(30, 41, 59, 0.5);
+        }
+
+        .submit-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-section {
+            display: none;
+            margin-top: 35px;
+            padding: 30px;
+            background: #f8fafc;
+            border-radius: 16px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .result-section.success {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border-color: #22c55e;
+            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.15);
+        }
+
+        .result-section.error {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border-color: #ef4444;
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.15);
+        }
+
+        .result-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .result-title.success {
+            color: #16a34a;
+        }
+
+        .result-title.error {
+            color: #dc2626;
+        }
+
+        .result-content {
+            color: #374151;
+            line-height: 1.6;
+        }
+
+        .download-link {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .download-link:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+
+        .char-counter {
+            font-size: 0.9rem;
+            color: #6b7280;
+            text-align: right;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .char-counter.warning {
+            color: #f59e0b;
+        }
+
+        .char-counter.error {
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>F&E-Herausforderung</h1>
+            <p>Dokumentieren Sie Ihre Forschungs- und Entwicklungsprojekte</p>
+        </div>
+
+        <form id="antragsForm">
+            <div class="form-group">
+                <label for="content">Gesprächsprotokoll / Transkript / Notizen</label>
+                <textarea id="content" name="content" required 
+                          placeholder="Gib mir ein Gesprächsprotokoll, Transkript oder Notizen. Ich will Arbeiten..."
+                          minlength="100"></textarea>
+                <div class="char-counter" id="charCounter">0 / 100 Zeichen (Minimum)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="fileType">Dokumenttyp</label>
+                <select id="fileType" name="fileType">
+                    <option value="text">Freitext / Notizen</option>
+                    <option value="transcript">Gesprächstranskript</option>
+                    <option value="protocol">Meeting-Protokoll</option>
+                    <option value="notes">Projektnotizen</option>
+                </select>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <div class="loading-spinner" id="loadingSpinner"></div>
+                <span id="btnText">Förderantrag generieren</span>
+            </button>
+        </form>
+
+        <div class="result-section" id="resultSection">
+            <div class="result-title" id="resultTitle"></div>
+            <div class="result-content" id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Konfiguration - n8n Webhook URL (zurück zum funktionierenden)
+        const WEBHOOK_URL = 'https://cleverfunding.app.n8n.cloud/webhook-test/fe-antrag-upload';
+
+        // DOM Elemente
+        const form = document.getElementById('antragsForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const resultSection = document.getElementById('resultSection');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultContent = document.getElementById('resultContent');
+        const contentTextarea = document.getElementById('content');
+        const charCounter = document.getElementById('charCounter');
+
+        // Zeichenzähler
+        contentTextarea.addEventListener('input', function() {
+            const length = this.value.length;
+            const counter = document.getElementById('charCounter');
+            
+            if (length < 100) {
+                counter.textContent = `${length} / 100 Zeichen (Minimum)`;
+                counter.className = 'char-counter error';
+            } else if (length < 500) {
+                counter.textContent = `${length} Zeichen - Gut für Analyse`;
+                counter.className = 'char-counter warning';
+            } else {
+                counter.textContent = `${length} Zeichen - Optimal für detaillierte Analyse`;
+                counter.className = 'char-counter';
+            }
+        });
+
+        // Form Submit Handler
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // UI für Loading State
+            setLoadingState(true);
+            hideResult();
+            
+            // Form Daten sammeln
+            const formData = new FormData(form);
+            const data = {
+                text: formData.get('content'),
+                fileType: formData.get('fileType'),
+                timestamp: new Date().toISOString(),
+                source: 'web-interface'
+            };
+
+            try {
+                // Webhook Request
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        body: data
+                    })
+                });
+
+                const result = await response.json();
+                
+                // Debug: Zeige was n8n zurückgibt
+                console.log('n8n Response:', result);
+                console.log('Response Status:', response.status);
+                console.log('Response OK:', response.ok);
+                console.log('Response Headers:', response.headers);
+
+                if (response.ok) {
+                    // Simple success - n8n received the data successfully
+                    showSuccess({
+                        status: 'success',
+                        message: 'Daten erfolgreich an n8n gesendet',
+                        processing_time: 'Verarbeitung läuft...'
+                    });
+                } else {
+                    console.log('Error Details:', {
+                        responseOk: response.ok,
+                        resultStatus: result.status,
+                        resultError: result.error,
+                        fullResult: result
+                    });
+                    throw new Error(result.error || 'Unbekannter Fehler bei der Verarbeitung');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(error.message);
+            } finally {
+                setLoadingState(false);
+            }
+        });
+
+        function setLoadingState(loading) {
+            submitBtn.disabled = loading;
+            if (loading) {
+                loadingSpinner.style.display = 'inline-block';
+                btnText.textContent = 'Analyse läuft... Bitte warten';
+            } else {
+                loadingSpinner.style.display = 'none';
+                btnText.textContent = 'Förderantrag generieren';
+            }
+        }
+
+        function showSuccess(result) {
+            resultSection.style.display = 'block';
+            resultSection.className = 'result-section success';
+            resultTitle.textContent = 'Förderantrag erfolgreich generiert!';
+            resultTitle.className = 'result-title success';
+            
+            let content = `
+                <p><strong>Projektbezeichnung:</strong> ${result.document?.projekt || 'F&E-Projekt'}</p>
+                <p><strong>Verarbeitungszeit:</strong> ${result.processing_time || 'N/A'}</p>
+                <p><strong>Status:</strong> Dokument wurde erstellt und per E-Mail versendet</p>
+            `;
+            
+            if (result.document?.drive_link) {
+                content += `<a href="${result.document.drive_link}" class="download-link" target="_blank">Dokument in Google Drive öffnen</a>`;
+            }
+            
+            resultContent.innerHTML = content;
+            
+            // Smooth scroll to result
+            resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function showError(errorMessage) {
+            resultSection.style.display = 'block';
+            resultSection.className = 'result-section error';
+            resultTitle.textContent = 'Fehler bei der Verarbeitung';
+            resultTitle.className = 'result-title error';
+            resultContent.innerHTML = `
+                <p><strong>Fehlermeldung:</strong> ${errorMessage}</p>
+                <p>Bitte prüfen Sie Ihre Eingaben und versuchen Sie es erneut. Bei wiederholten Problemen kontaktieren Sie den Support.</p>
+            `;
+            
+            resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function hideResult() {
+            resultSection.style.display = 'none';
+        }
+
+        // Auto-resize textarea
+        contentTextarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.max(200, this.scrollHeight) + 'px';
+        });
+
+        // Prevent form submission on Enter in textarea
+        contentTextarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                form.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Auto-save to localStorage (optional)
+        const fields = ['content'];
+        fields.forEach(field => {
+            const element = document.getElementById(field);
+            
+            // Load saved data
+            const saved = localStorage.getItem(`fe_antrag_${field}`);
+            if (saved && element.value === '') {
+                element.value = saved;
+                if (field === 'content') {
+                    element.dispatchEvent(new Event('input'));
+                }
+            }
+            
+            // Save on input
+            element.addEventListener('input', function() {
+                localStorage.setItem(`fe_antrag_${field}`, this.value);
+            });
+        });
+    </script>
+</body>
+</html>
