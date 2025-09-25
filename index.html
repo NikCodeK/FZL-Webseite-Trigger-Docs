@@ -240,27 +240,16 @@
                 <div class="char-counter" id="charCounter">0 / 100 Zeichen (Minimum)</div>
             </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="fileType">Dokumenttyp</label>
-                    <select id="fileType" name="fileType">
-                        <option value="text">Freitext / Notizen</option>
-                        <option value="transcript">Gesprächstranskript</option>
-                        <option value="protocol">Meeting-Protokoll</option>
-                        <option value="notes">Projektnotizen</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="consultant">Wer bist du?</label>
-                    <select id="consultant" name="consultant" required>
-                        <option value="">Bitte wählen...</option>
-                        <option value="Felix Winkelnkemper">Felix Winkelnkemper</option>
-                        <option value="Lisa Onwordi">Lisa Onwordi</option>
-                        <option value="David Rutz">David Rutz</option>
-                        <option value="Gerhard Bartscher">Gerhard Bartscher</option>
-                        <option value="Tobias Birzer">Tobias Birzer</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label for="consultant">Wer bist du?</label>
+                <select id="consultant" name="consultant" required>
+                    <option value="">Bitte wählen...</option>
+                    <option value="Felix Winkelnkemper">Felix Winkelnkemper</option>
+                    <option value="Lisa Onwordi">Lisa Onwordi</option>
+                    <option value="David Rutz">David Rutz</option>
+                    <option value="Gerhard Bartscher">Gerhard Bartscher</option>
+                    <option value="Tobias Birzer">Tobias Birzer</option>
+                </select>
             </div>
 
             <button type="submit" class="submit-btn" id="submitBtn">
@@ -319,7 +308,6 @@
             const formData = new FormData(form);
             const data = {
                 text: formData.get('content'),
-                fileType: formData.get('fileType'),
                 consultant: formData.get('consultant'),
                 timestamp: new Date().toISOString(),
                 source: 'web-interface'
