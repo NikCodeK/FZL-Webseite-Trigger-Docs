@@ -525,6 +525,16 @@
     <script>
         // Konfiguration - n8n Webhook URL
         const WEBHOOK_URL = 'https://cleverfunding.app.n8n.cloud/webhook-test/fe-antrag-upload';
+        
+        // Initialize consultantEmails globally
+        window.consultantEmails = {
+            "Felix Winkelnkemper": "fwi@thierhoff-consulting.de",
+            "Lisa Onwordi": "lon@thierhoff-consulting.de",
+            "David Rutz": "dru@thierhoff-consulting.de",
+            "Gerhard Bartscher": "gba@thierhoff-consulting.de",
+            "Tobias Birzer": "tbi@thierhoff-consulting.de",
+            "Nik Kremer": "nkr@thierhoff-consulting.de"
+        };
 
         // DOM Elemente
         const form = document.getElementById('antragsForm');
@@ -566,15 +576,7 @@
             const formData = new FormData(form);
             const consultantName = formData.get('consultant');
             
-            // Consultant to email mapping
-            window.consultantEmails = {
-                "Felix Winkelnkemper": "fwi@thierhoff-consulting.de",
-                "Lisa Onwordi": "lon@thierhoff-consulting.de",
-                "David Rutz": "dru@thierhoff-consulting.de",
-                "Gerhard Bartscher": "gba@thierhoff-consulting.de",
-                "Tobias Birzer": "tbi@thierhoff-consulting.de",
-                "Nik Kremer": "nkr@thierhoff-consulting.de"
-            };
+            // Consultant to email mapping (already initialized globally)
             
             const data = {
                 text: formData.get('content'),
