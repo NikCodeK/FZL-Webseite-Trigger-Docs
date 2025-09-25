@@ -242,6 +242,104 @@
             border-color: #1e293b;
         }
 
+        .manage-users-btn {
+            background: #f1f5f9;
+            color: #475569;
+            border: 2px solid #cbd5e1;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            width: 100%;
+        }
+
+        .manage-users-btn:hover {
+            background: #e2e8f0;
+            border-color: #475569;
+        }
+
+        .user-list {
+            display: none;
+            margin-top: 15px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .user-list.show {
+            display: block;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .user-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .user-email {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .edit-btn {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .edit-btn:hover {
+            background: #bfdbfe;
+        }
+
+        .delete-btn {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .delete-btn:hover {
+            background: #fecaca;
+        }
+
         .popup-overlay {
             display: none;
             position: fixed;
@@ -344,6 +442,10 @@
                         <option value="Nik Kremer">Nik Kremer</option>
                     </select>
                     <button type="button" id="addUserBtn" class="add-user-btn">+ Neuen Benutzer</button>
+                    <button type="button" id="manageUsersBtn" class="manage-users-btn">Nutzer Verwalten</button>
+                    <div class="user-list" id="userList">
+                        <!-- User list will be populated dynamically -->
+                    </div>
                 </div>
 
             <button type="submit" class="submit-btn" id="submitBtn">
@@ -585,6 +687,8 @@
 
         // Add User Popup Functionality
         const addUserBtn = document.getElementById('addUserBtn');
+        const manageUsersBtn = document.getElementById('manageUsersBtn');
+        const userList = document.getElementById('userList');
         const popupOverlay = document.getElementById('popupOverlay');
         const cancelBtn = document.getElementById('cancelBtn');
         const nextBtn = document.getElementById('nextBtn');
@@ -650,6 +754,135 @@
                 
                 // Select the new user
                 consultantSelect.value = fullName;
+                
+                // Update user list
+                updateUserList();
+                
+                // Close popup
+                closePopup();
+            }
+        });
+
+        // Toggle user list
+        manageUsersBtn.addEventListener('click', function() {
+            userList.classList.toggle('show');
+            if (userList.classList.contains('show')) {
+                updateUserList();
+            }
+        });
+
+        // Update user list display
+        function updateUserList() {
+            userList.innerHTML = '';
+            
+            // Add default users
+            const defaultUsers = [
+                { name: 'Felix Winkelnkemper', email: 'fwi@thierhoff-consulting.de' },
+                { name: 'Lisa Onwordi', email: 'lon@thierhoff-consulting.de' },
+                { name: 'David Rutz', email: 'dru@thierhoff-consulting.de' },
+                { name: 'Gerhard Bartscher', email: 'gba@thierhoff-consulting.de' },
+                { name: 'Tobias Birzer', email: 'tbi@thierhoff-consulting.de' },
+                { name: 'Nik Kremer', email: 'nkr@thierhoff-consulting.de' }
+            ];
+
+            // Add all users (default + dynamic)
+            const allUsers = [...defaultUsers];
+            Object.keys(consultantEmails).forEach(name => {
+                if (!defaultUsers.find(u => u.name === name)) {
+                    allUsers.push({ name, email: consultantEmails[name] });
+                }
+            });
+
+            allUsers.forEach(user => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                userItem.innerHTML = `
+                    <div class="user-info">
+                        <div class="user-name">${user.name}</div>
+                        <div class="user-email">${user.email}</div>
+                    </div>
+                    <div class="user-actions">
+                        <button class="action-btn edit-btn" onclick="editUser('${user.name}', '${user.email}')">✏️</button>
+                        <button class="action-btn delete-btn" onclick="deleteUser('${user.name}')">🗑️</button>
+                    </div>
+                `;
+                userList.appendChild(userItem);
+            });
+        }
+
+        // Edit user function
+        window.editUser = function(name, email) {
+            // Pre-fill the popup with existing data
+            const nameParts = name.split(' ');
+            firstName.value = nameParts[0] || '';
+            lastName.value = nameParts.slice(1).join(' ') || '';
+            userEmail.value = email;
+            
+            // Open popup
+            popupOverlay.style.display = 'flex';
+            step1.classList.add('active');
+            step2.classList.remove('active');
+            
+            // Store original name for updating
+            window.editingUser = name;
+        };
+
+        // Delete user function
+        window.deleteUser = function(name) {
+            if (confirm(`Möchten Sie "${name}" wirklich löschen?`)) {
+                // Remove from select dropdown
+                const option = consultantSelect.querySelector(`option[value="${name}"]`);
+                if (option) {
+                    option.remove();
+                }
+                
+                // Remove from email mapping
+                delete consultantEmails[name];
+                
+                // Update user list
+                updateUserList();
+                
+                // Clear selection if deleted user was selected
+                if (consultantSelect.value === name) {
+                    consultantSelect.value = '';
+                }
+            }
+        };
+
+        // Modify save function to handle editing
+        const originalSaveBtn = saveBtn.cloneNode(true);
+        saveBtn.parentNode.replaceChild(originalSaveBtn, saveBtn);
+        originalSaveBtn.addEventListener('click', function() {
+            if (userEmail.value.trim()) {
+                const fullName = `${firstName.value.trim()} ${lastName.value.trim()}`;
+                const email = userEmail.value.trim();
+                
+                // If editing, remove old entry
+                if (window.editingUser && window.editingUser !== fullName) {
+                    const oldOption = consultantSelect.querySelector(`option[value="${window.editingUser}"]`);
+                    if (oldOption) {
+                        oldOption.remove();
+                    }
+                    delete consultantEmails[window.editingUser];
+                }
+                
+                // Add/update in select dropdown
+                const option = document.createElement('option');
+                option.value = fullName;
+                option.textContent = fullName;
+                consultantSelect.appendChild(option);
+                
+                // Add/update in email mapping
+                consultantEmails[fullName] = email;
+                
+                // Select the user
+                consultantSelect.value = fullName;
+                
+                // Update user list
+                updateUserList();
+                
+                // Clear editing state
+                window.editingUser = null;
                 
                 // Close popup
                 closePopup();
