@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F&E-Förderantrag Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #1e293b;
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1e293b;
+            box-shadow: 0 0 0 4px rgba(30, 41, 59, 0.15);
+            background: white;
+            transform: translateY(-1px);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 200px;
+            font-family: inherit;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+
+        .submit-btn {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 25px;
+            box-shadow: 0 4px 15px rgba(30, 41, 59, 0.3);
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(30, 41, 59, 0.5);
+        }
+
+        .submit-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-section {
+            display: none;
+            margin-top: 35px;
+            padding: 30px;
+            background: #f8fafc;
+            border-radius: 16px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .result-section.success {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border-color: #22c55e;
+            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.15);
+        }
+
+        .result-section.error {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border-color: #ef4444;
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.15);
+        }
+
+        .result-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .result-title.success {
+            color: #16a34a;
+        }
+
+        .result-title.error {
+            color: #dc2626;
+        }
+
+        .result-content {
+            color: #374151;
+            line-height: 1.6;
+        }
+
+        .download-link {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .download-link:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+
+        .char-counter {
+            font-size: 0.9rem;
+            color: #6b7280;
+            text-align: right;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .char-counter.warning {
+            color: #f59e0b;
+        }
+
+        .char-counter.error {
+            color: #ef4444;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .add-user-btn {
+            background: #f1f5f9;
+            color: #475569;
+            border: 2px solid #cbd5e1;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .add-user-btn:hover {
+            background: #e2e8f0;
+            border-color: #475569;
+        }
+
+        .manage-users-btn {
+            background: #f1f5f9;
+            color: #475569;
+            border: 2px solid #cbd5e1;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .manage-users-btn:hover {
+            background: #e2e8f0;
+            border-color: #475569;
+        }
+
+        .user-list {
+            display: none;
+            margin-top: 15px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .user-list.show {
+            display: block;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .user-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .user-email {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .edit-btn {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .edit-btn:hover {
+            background: #bfdbfe;
+        }
+
+        .delete-btn {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .delete-btn:hover {
+            background: #fecaca;
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .popup-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .popup-step {
+            display: none;
+        }
+
+        .popup-step.active {
+            display: block;
+        }
+
+        .popup-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .popup-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .popup-btn.primary {
+            background: #1e293b;
+            color: white;
+        }
+
+        .popup-btn.primary:hover {
+            background: #334155;
+        }
+
+        .popup-btn.secondary {
+            background: #f8fafc;
+            color: #64748b;
+            border: 2px solid #e2e8f0;
+        }
+
+        .popup-btn.secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .success-message {
+            display: none;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 2px solid #22c55e;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            color: #16a34a;
+            font-weight: 600;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>F&E-Antragsgenerator</h1>
+            <p>Dokumentieren Sie Ihre Forschungs- und Entwicklungsprojekte</p>
+        </div>
+
+        <form id="antragsForm">
+            <div class="form-group">
+                <label for="content">Gesprächsprotokoll / Transkript / Notizen</label>
+                <textarea id="content" name="content" required 
+                          placeholder="Gib mir ein Gesprächsprotokoll, Transkript oder Notizen. Ich will Arbeiten..."
+                          minlength="100"></textarea>
+                <div class="char-counter" id="charCounter">0 / 100 Zeichen (Minimum)</div>
+            </div>
+
+                <div class="form-group">
+                    <label for="consultant">Wer bist du?</label>
+                    <select id="consultant" name="consultant" required>
+                        <option value="">Bitte wählen...</option>
+                        <option value="Felix Winkelnkemper">Felix Winkelnkemper</option>
+                        <option value="Lisa Onwordi">Lisa Onwordi</option>
+                        <option value="David Rutz">David Rutz</option>
+                        <option value="Gerhard Bartscher">Gerhard Bartscher</option>
+                        <option value="Tobias Birzer">Tobias Birzer</option>
+                        <option value="Nik Kremer">Nik Kremer</option>
+                    </select>
+                    <div class="button-group">
+                        <button type="button" id="addUserBtn" class="add-user-btn">+ Neuen Benutzer</button>
+                        <button type="button" id="manageUsersBtn" class="manage-users-btn">Nutzer Verwalten</button>
+                    </div>
+                    <div class="user-list" id="userList">
+                        <!-- User list will be populated dynamically -->
+                    </div>
+                </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <div class="loading-spinner" id="loadingSpinner"></div>
+                <span id="btnText">Förderantrag generieren</span>
+            </button>
+        </form>
+
+        <div class="result-section" id="resultSection">
+            <div class="result-title" id="resultTitle"></div>
+            <div class="result-content" id="resultContent"></div>
+        </div>
+    </div>
+
+    <!-- Add User Popup -->
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup-content">
+            <!-- Step 1: Name -->
+            <div class="popup-step active" id="step1">
+                <div class="popup-title">Neuen Benutzer hinzufügen</div>
+                <div class="form-group">
+                    <label for="firstName">Vorname</label>
+                    <input type="text" id="firstName" name="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Nachname</label>
+                    <input type="text" id="lastName" name="lastName" required>
+                </div>
+                <div class="popup-buttons">
+                    <button class="popup-btn secondary" id="cancelBtn">Abbrechen</button>
+                    <button class="popup-btn primary" id="nextBtn">Weiter</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Email -->
+            <div class="popup-step" id="step2">
+                <div class="popup-title">E-Mail-Adresse</div>
+                <div class="form-group">
+                    <label for="userEmail">E-Mail</label>
+                    <input type="email" id="userEmail" name="userEmail" required>
+                </div>
+                <div class="popup-buttons">
+                    <button class="popup-btn secondary" id="backBtn">Zurück</button>
+                    <button class="popup-btn primary" id="saveBtn">Speichern</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Success -->
+            <div class="popup-step" id="step3">
+                <div class="popup-title">✅ Erfolgreich gespeichert!</div>
+                <div class="success-message show">
+                    Der Benutzer wurde erfolgreich hinzugefügt und ist jetzt verfügbar.
+                </div>
+                <div class="popup-buttons">
+                    <button class="popup-btn primary" id="closeSuccessBtn">Schließen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // Konfiguration - n8n Webhook URL
+        const WEBHOOK_URL = 'https://cleverfunding.app.n8n.cloud/webhook-test/fe-antrag-upload';
+        
+        // Supabase Konfiguration
+        const supabaseUrl = 'https://movdssibgfczycfxnhdy.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vdmRzc2liZ2ZjenljZnhuaGR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3OTQ5MjgsImV4cCI6MjA3NDM3MDkyOH0.XhL0q6m8ra0tLL6TnkRcvhPS_he_9jeb81V6FaH5_OI';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // Initialize consultantEmails globally (will be populated from Supabase)
+        window.consultantEmails = {};
+
+        // DOM Elemente
+        const form = document.getElementById('antragsForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const resultSection = document.getElementById('resultSection');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultContent = document.getElementById('resultContent');
+        const contentTextarea = document.getElementById('content');
+        const charCounter = document.getElementById('charCounter');
+
+        // Zeichenzähler
+        contentTextarea.addEventListener('input', function() {
+            const length = this.value.length;
+            const counter = document.getElementById('charCounter');
+            
+            if (length < 100) {
+                counter.textContent = `${length} / 100 Zeichen (Minimum)`;
+                counter.className = 'char-counter error';
+            } else if (length < 500) {
+                counter.textContent = `${length} Zeichen - Gut für Analyse`;
+                counter.className = 'char-counter warning';
+            } else {
+                counter.textContent = `${length} Zeichen - Optimal für detaillierte Analyse`;
+                counter.className = 'char-counter';
+            }
+        });
+
+        // Form Submit Handler
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // UI für Loading State
+            setLoadingState(true);
+            hideResult();
+            
+            // Form Daten sammeln
+            const formData = new FormData(form);
+            const consultantName = formData.get('consultant');
+            
+            // Consultant to email mapping (already initialized globally)
+            
+            const data = {
+                text: formData.get('content'),
+                consultant: consultantName,
+                email: window.consultantEmails[consultantName],
+                timestamp: new Date().toISOString(),
+                source: 'web-interface'
+            };
+
+            try {
+                // Webhook Request
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        body: data
+                    })
+                });
+
+                const responseText = await response.text();
+                let result;
+                try {
+                    result = responseText ? JSON.parse(responseText) : {};
+                } catch (parseError) {
+                    result = { status: 'success', message: 'Daten empfangen' };
+                }
+                
+                if (response.ok) {
+                    // Handle different response formats
+                    if (result.status === 'success') {
+                        showSuccess(result);
+                    } else if (result.message) {
+                        showSuccess({
+                            status: 'success',
+                            message: result.message,
+                            processing_time: result.processing_time || 'Verarbeitung läuft...'
+                        });
+                    } else {
+                        // Fallback for any successful response
+                        showSuccess({
+                            status: 'success',
+                            message: 'Daten erfolgreich an n8n gesendet',
+                            processing_time: 'Verarbeitung läuft...'
+                        });
+                    }
+                } else {
+                    throw new Error(result.error || 'Unbekannter Fehler bei der Verarbeitung');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(error.message);
+            } finally {
+                setLoadingState(false);
+            }
+        });
+
+        function setLoadingState(loading) {
+            submitBtn.disabled = loading;
+            if (loading) {
+                loadingSpinner.style.display = 'inline-block';
+                btnText.textContent = 'Analyse läuft... Bitte warten';
+            } else {
+                loadingSpinner.style.display = 'none';
+                btnText.textContent = 'Förderantrag generieren';
+            }
+        }
+
+        function showSuccess(result) {
+            resultSection.style.display = 'block';
+            resultSection.className = 'result-section success';
+            resultTitle.textContent = 'Förderantrag erfolgreich generiert!';
+            resultTitle.className = 'result-title success';
+            
+            let content = `
+                <p><strong>Projektbezeichnung:</strong> ${result.document?.projekt || 'F&E-Projekt'}</p>
+                <p><strong>Verarbeitungszeit:</strong> ${result.processing_time || 'N/A'}</p>
+                <p><strong>Status:</strong> Dokument wurde erstellt und per E-Mail versendet</p>
+            `;
+            
+            if (result.document?.drive_link) {
+                content += `<a href="${result.document.drive_link}" class="download-link" target="_blank">Dokument in Google Drive öffnen</a>`;
+            }
+            
+            resultContent.innerHTML = content;
+            
+            // Smooth scroll to result
+            resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function showError(errorMessage) {
+            resultSection.style.display = 'block';
+            resultSection.className = 'result-section error';
+            resultTitle.textContent = 'Fehler bei der Verarbeitung';
+            resultTitle.className = 'result-title error';
+            resultContent.innerHTML = `
+                <p><strong>Fehlermeldung:</strong> ${errorMessage}</p>
+                <p>Bitte prüfen Sie Ihre Eingaben und versuchen Sie es erneut. Bei wiederholten Problemen kontaktieren Sie den Support.</p>
+            `;
+            
+            resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function hideResult() {
+            resultSection.style.display = 'none';
+        }
+
+        // Auto-resize textarea
+        contentTextarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.max(200, this.scrollHeight) + 'px';
+        });
+
+        // Prevent form submission on Enter in textarea
+        contentTextarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                form.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Add User Popup Functionality
+        const addUserBtn = document.getElementById('addUserBtn');
+        const manageUsersBtn = document.getElementById('manageUsersBtn');
+        const userList = document.getElementById('userList');
+        const popupOverlay = document.getElementById('popupOverlay');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const backBtn = document.getElementById('backBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
+        const firstName = document.getElementById('firstName');
+        const lastName = document.getElementById('lastName');
+        const userEmail = document.getElementById('userEmail');
+        const consultantSelect = document.getElementById('consultant');
+        const closeSuccessBtn = document.getElementById('closeSuccessBtn');
+
+        // Open popup
+        addUserBtn.addEventListener('click', function() {
+            popupOverlay.style.display = 'flex';
+            step1.classList.add('active');
+            step2.classList.remove('active');
+            step3.classList.remove('active');
+            firstName.value = '';
+            lastName.value = '';
+            userEmail.value = '';
+        });
+
+        // Close popup
+        function closePopup() {
+            popupOverlay.style.display = 'none';
+        }
+
+        cancelBtn.addEventListener('click', closePopup);
+        popupOverlay.addEventListener('click', function(e) {
+            if (e.target === popupOverlay) {
+                closePopup();
+            }
+        });
+
+        // Next step
+        nextBtn.addEventListener('click', function() {
+            if (firstName.value.trim() && lastName.value.trim()) {
+                step1.classList.remove('active');
+                step2.classList.add('active');
+            }
+        });
+
+        // Back step
+        backBtn.addEventListener('click', function() {
+            step2.classList.remove('active');
+            step1.classList.add('active');
+        });
+
+        // Save user - handled by the new saveUser() function below
+
+        // Toggle user list
+        manageUsersBtn.addEventListener('click', function() {
+            userList.classList.toggle('show');
+            if (userList.classList.contains('show')) {
+                updateUserList();
+            }
+        });
+
+        // Update user list display
+        function updateUserList() {
+            userList.innerHTML = '';
+            
+            // Add default users
+            const defaultUsers = [
+                { name: 'Felix Winkelnkemper', email: 'fwi@thierhoff-consulting.de' },
+                { name: 'Lisa Onwordi', email: 'lon@thierhoff-consulting.de' },
+                { name: 'David Rutz', email: 'dru@thierhoff-consulting.de' },
+                { name: 'Gerhard Bartscher', email: 'gba@thierhoff-consulting.de' },
+                { name: 'Tobias Birzer', email: 'tbi@thierhoff-consulting.de' },
+                { name: 'Nik Kremer', email: 'nkr@thierhoff-consulting.de' }
+            ];
+
+            // Add all users (default + dynamic)
+            const allUsers = [...defaultUsers];
+            Object.keys(window.consultantEmails).forEach(name => {
+                if (!defaultUsers.find(u => u.name === name)) {
+                    allUsers.push({ name, email: window.consultantEmails[name] });
+                }
+            });
+
+            allUsers.forEach(user => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                userItem.innerHTML = `
+                    <div class="user-info">
+                        <div class="user-name">${user.name}</div>
+                        <div class="user-email">${user.email}</div>
+                    </div>
+                    <div class="user-actions">
+                        <button class="action-btn edit-btn" onclick="editUser('${user.name}', '${user.email}')">✏️</button>
+                        <button class="action-btn delete-btn" onclick="deleteUser('${user.name}')">🗑️</button>
+                    </div>
+                `;
+                userList.appendChild(userItem);
+            });
+        }
+
+        // Edit user function
+        window.editUser = function(name, email) {
+            // Pre-fill the popup with existing data
+            const nameParts = name.split(' ');
+            firstName.value = nameParts[0] || '';
+            lastName.value = nameParts.slice(1).join(' ') || '';
+            userEmail.value = email;
+            
+            // Open popup
+            popupOverlay.style.display = 'flex';
+            step1.classList.add('active');
+            step2.classList.remove('active');
+            
+            // Store original name for updating
+            window.editingUser = name;
+        };
+
+        // Delete user function
+        window.deleteUser = async function(name) {
+            if (confirm(`Möchten Sie "${name}" wirklich löschen?`)) {
+                // Delete from Supabase
+                const success = await deleteUserFromSupabase(name);
+                
+                if (success) {
+                    // Remove from select dropdown
+                    const option = consultantSelect.querySelector(`option[value="${name}"]`);
+                    if (option) {
+                        option.remove();
+                    }
+                    
+                    // Remove from email mapping
+                    delete window.consultantEmails[name];
+                    
+                    // Update user list
+                    updateUserList();
+                    
+                    // Clear selection if deleted user was selected
+                    if (consultantSelect.value === name) {
+                        consultantSelect.value = '';
+                    }
+                } else {
+                    console.error('Fehler beim Löschen des Users!');
+                }
+            }
+        };
+
+        // Save user function
+        async function saveUser() {
+            if (userEmail.value.trim()) {
+                const fullName = `${firstName.value.trim()} ${lastName.value.trim()}`;
+                const email = userEmail.value.trim();
+                
+                // Save to Supabase
+                const success = await saveUserToSupabase(fullName, email);
+                
+                if (success) {
+                    // If editing, remove old entry
+                    if (window.editingUser && window.editingUser !== fullName) {
+                        await deleteUserFromSupabase(window.editingUser);
+                        const oldOption = consultantSelect.querySelector(`option[value="${window.editingUser}"]`);
+                        if (oldOption) {
+                            oldOption.remove();
+                        }
+                        delete window.consultantEmails[window.editingUser];
+                    }
+                    
+                    // Add/update in email mapping
+                    window.consultantEmails[fullName] = email;
+                    
+                    // Update select dropdown
+                    updateConsultantSelect();
+                    
+                    // Select the user
+                    consultantSelect.value = fullName;
+                    
+                    // Update user list
+                    updateUserList();
+                    
+                    // Clear editing state
+                    window.editingUser = null;
+                    
+                    // Go to success step
+                    step2.classList.remove('active');
+                    step3.classList.add('active');
+                } else {
+                    console.error('Fehler beim Speichern des Users!');
+                }
+            }
+        }
+
+        // Add event listener to save button
+        saveBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            saveUser();
+        });
+
+        // Close success step
+        closeSuccessBtn.addEventListener('click', function() {
+            closePopup();
+        });
+
+        // Supabase Funktionen
+        async function loadUsersFromSupabase() {
+            try {
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    console.error('Error loading users:', error);
+                    return;
+                }
+                
+                // Update consultantEmails with data from Supabase
+                data.forEach(user => {
+                    window.consultantEmails[user.name] = user.email;
+                });
+                
+                // Update select dropdown
+                updateConsultantSelect();
+                updateUserList();
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+        
+        async function saveUserToSupabase(name, email) {
+            try {
+                const { data, error } = await supabase
+                    .from('users')
+                    .insert([
+                        { name: name, email: email }
+                    ]);
+                
+                if (error) {
+                    console.error('Error saving user:', error);
+                    return false;
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Error saving user:', error);
+                return false;
+            }
+        }
+        
+        async function deleteUserFromSupabase(name) {
+            try {
+                const { error } = await supabase
+                    .from('users')
+                    .delete()
+                    .eq('name', name);
+                
+                if (error) {
+                    console.error('Error deleting user:', error);
+                    return false;
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                return false;
+            }
+        }
+        
+        function updateConsultantSelect() {
+            // Clear existing options except the first one
+            const consultantSelect = document.getElementById('consultant');
+            consultantSelect.innerHTML = '<option value="">Berater auswählen</option>';
+            
+            // Add all users from consultantEmails
+            Object.keys(window.consultantEmails).forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                consultantSelect.appendChild(option);
+            });
+        }
+        
+        // Initialize default users in Supabase
+        async function initializeDefaultUsers() {
+            const defaultUsers = [
+                { name: "Felix Winkelnkemper", email: "fwi@thierhoff-consulting.de" },
+                { name: "Lisa Onwordi", email: "lon@thierhoff-consulting.de" },
+                { name: "David Rutz", email: "dru@thierhoff-consulting.de" },
+                { name: "Gerhard Bartscher", email: "gba@thierhoff-consulting.de" },
+                { name: "Tobias Birzer", email: "tbi@thierhoff-consulting.de" },
+                { name: "Nik Kremer", email: "nkr@thierhoff-consulting.de" }
+            ];
+            
+            try {
+                const { data: existingUsers } = await supabase
+                    .from('users')
+                    .select('name');
+                
+                const existingNames = existingUsers ? existingUsers.map(u => u.name) : [];
+                
+                // Add only users that don't exist
+                for (const user of defaultUsers) {
+                    if (!existingNames.includes(user.name)) {
+                        await supabase
+                            .from('users')
+                            .insert([user]);
+                    }
+                }
+            } catch (error) {
+                console.error('Error initializing default users:', error);
+            }
+        }
+        
+        // Load users when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDefaultUsers().then(() => {
+                loadUsersFromSupabase();
+            });
+        });
+        
+    </script>
+</body>
+</html>
