@@ -534,15 +534,8 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vdmRzc2liZ2ZjenljZnhuaGR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3OTQ5MjgsImV4cCI6MjA3NDM3MDkyOH0.XhL0q6m8ra0tLL6TnkRcvhPS_he_9jeb81V6FaH5_OI';
         const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
         
-        // Initialize consultantEmails globally
-        window.consultantEmails = {
-            "Felix Winkelnkemper": "fwi@thierhoff-consulting.de",
-            "Lisa Onwordi": "lon@thierhoff-consulting.de",
-            "David Rutz": "dru@thierhoff-consulting.de",
-            "Gerhard Bartscher": "gba@thierhoff-consulting.de",
-            "Tobias Birzer": "tbi@thierhoff-consulting.de",
-            "Nik Kremer": "nkr@thierhoff-consulting.de"
-        };
+        // Initialize consultantEmails globally (will be populated from Supabase)
+        window.consultantEmails = {};
 
         // DOM Elemente
         const form = document.getElementById('antragsForm');
@@ -1018,9 +1011,44 @@
             });
         }
         
+        // Initialize default users in Supabase
+        async function initializeDefaultUsers() {
+            const defaultUsers = [
+                { name: "Felix Winkelnkemper", email: "fwi@thierhoff-consulting.de" },
+                { name: "Lisa Onwordi", email: "lon@thierhoff-consulting.de" },
+                { name: "David Rutz", email: "dru@thierhoff-consulting.de" },
+                { name: "Gerhard Bartscher", email: "gba@thierhoff-consulting.de" },
+                { name: "Tobias Birzer", email: "tbi@thierhoff-consulting.de" },
+                { name: "Nik Kremer", email: "nkr@thierhoff-consulting.de" }
+            ];
+            
+            try {
+                // Check if users already exist
+                const { data: existingUsers } = await supabase
+                    .from('users')
+                    .select('name');
+                
+                const existingNames = existingUsers ? existingUsers.map(u => u.name) : [];
+                
+                // Add only users that don't exist
+                for (const user of defaultUsers) {
+                    if (!existingNames.includes(user.name)) {
+                        await supabase
+                            .from('users')
+                            .insert([user]);
+                        console.log('Added default user:', user.name);
+                    }
+                }
+            } catch (error) {
+                console.error('Error initializing default users:', error);
+            }
+        }
+        
         // Load users when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            loadUsersFromSupabase();
+            initializeDefaultUsers().then(() => {
+                loadUsersFromSupabase();
+            });
         });
         
         // Auto-save functionality removed for fresh start on reload
