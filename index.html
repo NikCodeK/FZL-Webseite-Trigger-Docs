@@ -306,9 +306,21 @@
             
             // Form Daten sammeln
             const formData = new FormData(form);
+            const consultantName = formData.get('consultant');
+            
+            // Consultant to email mapping
+            const consultantEmails = {
+                "Felix Winkelnkemper": "fwi@thierhoff-consulting.de",
+                "Lisa Onwordi": "lon@thierhoff-consulting.de",
+                "David Rutz": "dru@thierhoff-consulting.de",
+                "Gerhard Bartscher": "gba@thierhoff-consulting.de",
+                "Tobias Birzer": "tbi@thierhoff-consulting.de"
+            };
+            
             const data = {
                 text: formData.get('content'),
-                consultant: formData.get('consultant'),
+                consultant: consultantName,
+                email: consultantEmails[consultantName],
                 timestamp: new Date().toISOString(),
                 source: 'web-interface'
             };
