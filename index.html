@@ -453,13 +453,7 @@
                 <div class="form-group">
                     <label for="consultant">Wer bist du?</label>
                     <select id="consultant" name="consultant" required>
-                        <option value="">Bitte wählen...</option>
-                        <option value="Felix Winkelnkemper">Felix Winkelnkemper</option>
-                        <option value="Lisa Onwordi">Lisa Onwordi</option>
-                        <option value="David Rutz">David Rutz</option>
-                        <option value="Gerhard Bartscher">Gerhard Bartscher</option>
-                        <option value="Tobias Birzer">Tobias Birzer</option>
-                        <option value="Nik Kremer">Nik Kremer</option>
+                        <option value="">Berater auswählen</option>
                     </select>
                     <div class="button-group">
                         <button type="button" id="addUserBtn" class="add-user-btn">+ Neuen Benutzer</button>
@@ -991,42 +985,9 @@
             });
         }
         
-        // Initialize default users in Supabase
-        async function initializeDefaultUsers() {
-            const defaultUsers = [
-                { name: "Felix Winkelnkemper", email: "fwi@thierhoff-consulting.de" },
-                { name: "Lisa Onwordi", email: "lon@thierhoff-consulting.de" },
-                { name: "David Rutz", email: "dru@thierhoff-consulting.de" },
-                { name: "Gerhard Bartscher", email: "gba@thierhoff-consulting.de" },
-                { name: "Tobias Birzer", email: "tbi@thierhoff-consulting.de" },
-                { name: "Nik Kremer", email: "nkr@thierhoff-consulting.de" }
-            ];
-            
-            try {
-                const { data: existingUsers } = await supabase
-                    .from('users')
-                    .select('name');
-                
-                const existingNames = existingUsers ? existingUsers.map(u => u.name) : [];
-                
-                // Add only users that don't exist
-                for (const user of defaultUsers) {
-                    if (!existingNames.includes(user.name)) {
-                        await supabase
-                            .from('users')
-                            .insert([user]);
-                    }
-                }
-            } catch (error) {
-                console.error('Error initializing default users:', error);
-            }
-        }
-        
         // Load users when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            initializeDefaultUsers().then(() => {
-                loadUsersFromSupabase();
-            });
+            loadUsersFromSupabase();
         });
         
     </script>
