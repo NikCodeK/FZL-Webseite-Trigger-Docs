@@ -599,9 +599,7 @@
                     })
                 });
 
-                // Check if response has content before parsing JSON
                 const responseText = await response.text();
-                
                 let result;
                 try {
                     result = responseText ? JSON.parse(responseText) : {};
@@ -609,7 +607,6 @@
                     result = { status: 'success', message: 'Daten empfangen' };
                 }
                 
-
                 if (response.ok) {
                     // Handle different response formats
                     if (result.status === 'success') {
@@ -848,7 +845,7 @@
                         consultantSelect.value = '';
                     }
                 } else {
-                    alert('Fehler beim Löschen des Users!');
+                    console.error('Fehler beim Löschen des Users!');
                 }
             }
         };
@@ -858,7 +855,6 @@
             if (userEmail.value.trim()) {
                 const fullName = `${firstName.value.trim()} ${lastName.value.trim()}`;
                 const email = userEmail.value.trim();
-                
                 
                 // Save to Supabase
                 const success = await saveUserToSupabase(fullName, email);
@@ -889,12 +885,11 @@
                     // Clear editing state
                     window.editingUser = null;
                     
-                    
                     // Go to success step
                     step2.classList.remove('active');
                     step3.classList.add('active');
                 } else {
-                    alert('Fehler beim Speichern des Users!');
+                    console.error('Fehler beim Speichern des Users!');
                 }
             }
         }
@@ -1002,7 +997,6 @@
             ];
             
             try {
-                // Check if users already exist
                 const { data: existingUsers } = await supabase
                     .from('users')
                     .select('name');
