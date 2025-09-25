@@ -769,31 +769,7 @@
             step1.classList.add('active');
         });
 
-        // Save user
-        saveBtn.addEventListener('click', function() {
-            if (userEmail.value.trim()) {
-                const fullName = `${firstName.value.trim()} ${lastName.value.trim()}`;
-                const email = userEmail.value.trim();
-                
-                // Add to select dropdown
-                const option = document.createElement('option');
-                option.value = fullName;
-                option.textContent = fullName;
-                consultantSelect.appendChild(option);
-                
-                // Add to email mapping
-                consultantEmails[fullName] = email;
-                
-                // Select the new user
-                consultantSelect.value = fullName;
-                
-                // Update user list
-                updateUserList();
-                
-                // Close popup
-                closePopup();
-            }
-        });
+        // Save user - handled by the new saveUser() function below
 
         // Toggle user list
         manageUsersBtn.addEventListener('click', function() {
