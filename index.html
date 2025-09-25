@@ -879,10 +879,8 @@
             }
         };
 
-        // Modify save function to handle editing
-        const originalSaveBtn = saveBtn.cloneNode(true);
-        saveBtn.parentNode.replaceChild(originalSaveBtn, saveBtn);
-        originalSaveBtn.addEventListener('click', function() {
+        // Save user function
+        function saveUser() {
             if (userEmail.value.trim()) {
                 const fullName = `${firstName.value.trim()} ${lastName.value.trim()}`;
                 const email = userEmail.value.trim();
@@ -918,7 +916,10 @@
                 step2.classList.remove('active');
                 step3.classList.add('active');
             }
-        });
+        }
+
+        // Add event listener to save button
+        saveBtn.addEventListener('click', saveUser);
 
         // Close success step
         closeSuccessBtn.addEventListener('click', function() {
