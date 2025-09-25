@@ -567,7 +567,7 @@
             const consultantName = formData.get('consultant');
             
             // Consultant to email mapping
-            const consultantEmails = {
+            window.consultantEmails = {
                 "Felix Winkelnkemper": "fwi@thierhoff-consulting.de",
                 "Lisa Onwordi": "lon@thierhoff-consulting.de",
                 "David Rutz": "dru@thierhoff-consulting.de",
@@ -579,7 +579,7 @@
             const data = {
                 text: formData.get('content'),
                 consultant: consultantName,
-                email: consultantEmails[consultantName],
+                email: window.consultantEmails[consultantName],
                 timestamp: new Date().toISOString(),
                 source: 'web-interface'
             };
@@ -817,9 +817,9 @@
 
             // Add all users (default + dynamic)
             const allUsers = [...defaultUsers];
-            Object.keys(consultantEmails).forEach(name => {
+            Object.keys(window.consultantEmails).forEach(name => {
                 if (!defaultUsers.find(u => u.name === name)) {
-                    allUsers.push({ name, email: consultantEmails[name] });
+                    allUsers.push({ name, email: window.consultantEmails[name] });
                 }
             });
 
@@ -867,7 +867,7 @@
                 }
                 
                 // Remove from email mapping
-                delete consultantEmails[name];
+                delete window.consultantEmails[name];
                 
                 // Update user list
                 updateUserList();
@@ -894,7 +894,7 @@
                     if (oldOption) {
                         oldOption.remove();
                     }
-                    delete consultantEmails[window.editingUser];
+                    delete window.consultantEmails[window.editingUser];
                 }
                 
                 // Add/update in select dropdown
@@ -904,7 +904,7 @@
                 consultantSelect.appendChild(option);
                 
                 // Add/update in email mapping
-                consultantEmails[fullName] = email;
+                window.consultantEmails[fullName] = email;
                 
                 // Select the user
                 consultantSelect.value = fullName;
