@@ -412,6 +412,22 @@
         .popup-btn.secondary:hover {
             background: #e2e8f0;
         }
+
+        .success-message {
+            display: none;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 2px solid #22c55e;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            color: #16a34a;
+            font-weight: 600;
+        }
+
+        .success-message.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -490,6 +506,9 @@
                 <div class="popup-buttons">
                     <button class="popup-btn secondary" id="backBtn">Zurück</button>
                     <button class="popup-btn primary" id="saveBtn">Speichern</button>
+                </div>
+                <div class="success-message" id="successMessage">
+                    ✅ Benutzer erfolgreich gespeichert!
                 </div>
             </div>
         </div>
@@ -700,6 +719,7 @@
         const lastName = document.getElementById('lastName');
         const userEmail = document.getElementById('userEmail');
         const consultantSelect = document.getElementById('consultant');
+        const successMessage = document.getElementById('successMessage');
 
         // Open popup
         addUserBtn.addEventListener('click', function() {
@@ -709,6 +729,7 @@
             firstName.value = '';
             lastName.value = '';
             userEmail.value = '';
+            successMessage.classList.remove('show');
         });
 
         // Close popup
@@ -884,8 +905,13 @@
                 // Clear editing state
                 window.editingUser = null;
                 
-                // Close popup
-                closePopup();
+                // Show success message
+                successMessage.classList.add('show');
+                
+                // Close popup after 2 seconds
+                setTimeout(() => {
+                    closePopup();
+                }, 2000);
             }
         });
 
