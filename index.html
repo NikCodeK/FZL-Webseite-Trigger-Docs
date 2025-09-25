@@ -222,6 +222,98 @@
         .char-counter.error {
             color: #ef4444;
         }
+
+        .add-user-btn {
+            background: #f8fafc;
+            color: #1e293b;
+            border: 2px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            width: 100%;
+        }
+
+        .add-user-btn:hover {
+            background: #e2e8f0;
+            border-color: #1e293b;
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .popup-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .popup-step {
+            display: none;
+        }
+
+        .popup-step.active {
+            display: block;
+        }
+
+        .popup-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .popup-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .popup-btn.primary {
+            background: #1e293b;
+            color: white;
+        }
+
+        .popup-btn.primary:hover {
+            background: #334155;
+        }
+
+        .popup-btn.secondary {
+            background: #f8fafc;
+            color: #64748b;
+            border: 2px solid #e2e8f0;
+        }
+
+        .popup-btn.secondary:hover {
+            background: #e2e8f0;
+        }
     </style>
 </head>
 <body>
@@ -251,6 +343,7 @@
                         <option value="Tobias Birzer">Tobias Birzer</option>
                         <option value="Nik Kremer">Nik Kremer</option>
                     </select>
+                    <button type="button" id="addUserBtn" class="add-user-btn">+ Neuen Benutzer</button>
                 </div>
 
             <button type="submit" class="submit-btn" id="submitBtn">
@@ -262,6 +355,41 @@
         <div class="result-section" id="resultSection">
             <div class="result-title" id="resultTitle"></div>
             <div class="result-content" id="resultContent"></div>
+        </div>
+    </div>
+
+    <!-- Add User Popup -->
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup-content">
+            <!-- Step 1: Name -->
+            <div class="popup-step active" id="step1">
+                <div class="popup-title">Neuen Benutzer hinzufügen</div>
+                <div class="form-group">
+                    <label for="firstName">Vorname</label>
+                    <input type="text" id="firstName" name="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Nachname</label>
+                    <input type="text" id="lastName" name="lastName" required>
+                </div>
+                <div class="popup-buttons">
+                    <button class="popup-btn secondary" id="cancelBtn">Abbrechen</button>
+                    <button class="popup-btn primary" id="nextBtn">Weiter</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Email -->
+            <div class="popup-step" id="step2">
+                <div class="popup-title">E-Mail-Adresse</div>
+                <div class="form-group">
+                    <label for="userEmail">E-Mail</label>
+                    <input type="email" id="userEmail" name="userEmail" required>
+                </div>
+                <div class="popup-buttons">
+                    <button class="popup-btn secondary" id="backBtn">Zurück</button>
+                    <button class="popup-btn primary" id="saveBtn">Speichern</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -452,6 +580,79 @@
         contentTextarea.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                 form.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Add User Popup Functionality
+        const addUserBtn = document.getElementById('addUserBtn');
+        const popupOverlay = document.getElementById('popupOverlay');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const backBtn = document.getElementById('backBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const firstName = document.getElementById('firstName');
+        const lastName = document.getElementById('lastName');
+        const userEmail = document.getElementById('userEmail');
+        const consultantSelect = document.getElementById('consultant');
+
+        // Open popup
+        addUserBtn.addEventListener('click', function() {
+            popupOverlay.style.display = 'flex';
+            step1.classList.add('active');
+            step2.classList.remove('active');
+            firstName.value = '';
+            lastName.value = '';
+            userEmail.value = '';
+        });
+
+        // Close popup
+        function closePopup() {
+            popupOverlay.style.display = 'none';
+        }
+
+        cancelBtn.addEventListener('click', closePopup);
+        popupOverlay.addEventListener('click', function(e) {
+            if (e.target === popupOverlay) {
+                closePopup();
+            }
+        });
+
+        // Next step
+        nextBtn.addEventListener('click', function() {
+            if (firstName.value.trim() && lastName.value.trim()) {
+                step1.classList.remove('active');
+                step2.classList.add('active');
+            }
+        });
+
+        // Back step
+        backBtn.addEventListener('click', function() {
+            step2.classList.remove('active');
+            step1.classList.add('active');
+        });
+
+        // Save user
+        saveBtn.addEventListener('click', function() {
+            if (userEmail.value.trim()) {
+                const fullName = `${firstName.value.trim()} ${lastName.value.trim()}`;
+                const email = userEmail.value.trim();
+                
+                // Add to select dropdown
+                const option = document.createElement('option');
+                option.value = fullName;
+                option.textContent = fullName;
+                consultantSelect.appendChild(option);
+                
+                // Add to email mapping
+                consultantEmails[fullName] = email;
+                
+                // Select the new user
+                consultantSelect.value = fullName;
+                
+                // Close popup
+                closePopup();
             }
         });
 
