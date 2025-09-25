@@ -507,8 +507,16 @@
                     <button class="popup-btn secondary" id="backBtn">Zurück</button>
                     <button class="popup-btn primary" id="saveBtn">Speichern</button>
                 </div>
-                <div class="success-message" id="successMessage">
-                    ✅ Benutzer erfolgreich gespeichert!
+            </div>
+
+            <!-- Step 3: Success -->
+            <div class="popup-step" id="step3">
+                <div class="popup-title">✅ Erfolgreich gespeichert!</div>
+                <div class="success-message show">
+                    Der Benutzer wurde erfolgreich hinzugefügt und ist jetzt verfügbar.
+                </div>
+                <div class="popup-buttons">
+                    <button class="popup-btn primary" id="closeSuccessBtn">Schließen</button>
                 </div>
             </div>
         </div>
@@ -715,21 +723,22 @@
         const saveBtn = document.getElementById('saveBtn');
         const step1 = document.getElementById('step1');
         const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
         const firstName = document.getElementById('firstName');
         const lastName = document.getElementById('lastName');
         const userEmail = document.getElementById('userEmail');
         const consultantSelect = document.getElementById('consultant');
-        const successMessage = document.getElementById('successMessage');
+        const closeSuccessBtn = document.getElementById('closeSuccessBtn');
 
         // Open popup
         addUserBtn.addEventListener('click', function() {
             popupOverlay.style.display = 'flex';
             step1.classList.add('active');
             step2.classList.remove('active');
+            step3.classList.remove('active');
             firstName.value = '';
             lastName.value = '';
             userEmail.value = '';
-            successMessage.classList.remove('show');
         });
 
         // Close popup
@@ -905,14 +914,15 @@
                 // Clear editing state
                 window.editingUser = null;
                 
-                // Show success message
-                successMessage.classList.add('show');
-                
-                // Close popup after 2 seconds
-                setTimeout(() => {
-                    closePopup();
-                }, 2000);
+                // Go to success step
+                step2.classList.remove('active');
+                step3.classList.add('active');
             }
+        });
+
+        // Close success step
+        closeSuccessBtn.addEventListener('click', function() {
+            closePopup();
         });
 
         // Auto-save functionality removed for fresh start on reload
