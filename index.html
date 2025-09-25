@@ -601,20 +601,14 @@
 
                 // Check if response has content before parsing JSON
                 const responseText = await response.text();
-                console.log('Raw Response:', responseText);
                 
                 let result;
                 try {
                     result = responseText ? JSON.parse(responseText) : {};
                 } catch (parseError) {
-                    console.log('JSON Parse Error:', parseError);
                     result = { status: 'success', message: 'Daten empfangen' };
                 }
                 
-                // Debug: Zeige was n8n zurückgibt
-                console.log('n8n Response:', result);
-                console.log('Response Status:', response.status);
-                console.log('Response OK:', response.ok);
 
                 if (response.ok) {
                     // Handle different response formats
@@ -635,12 +629,6 @@
                         });
                     }
                 } else {
-                    console.log('Error Details:', {
-                        responseOk: response.ok,
-                        resultStatus: result.status,
-                        resultError: result.error,
-                        fullResult: result
-                    });
                     throw new Error(result.error || 'Unbekannter Fehler bei der Verarbeitung');
                 }
 
@@ -867,12 +855,10 @@
 
         // Save user function
         async function saveUser() {
-            console.log('Save button clicked!'); // Debug
             if (userEmail.value.trim()) {
                 const fullName = `${firstName.value.trim()} ${lastName.value.trim()}`;
                 const email = userEmail.value.trim();
                 
-                console.log('Saving user:', fullName, email); // Debug
                 
                 // Save to Supabase
                 const success = await saveUserToSupabase(fullName, email);
@@ -903,7 +889,6 @@
                     // Clear editing state
                     window.editingUser = null;
                     
-                    console.log('Going to step 3'); // Debug
                     
                     // Go to success step
                     step2.classList.remove('active');
@@ -911,15 +896,12 @@
                 } else {
                     alert('Fehler beim Speichern des Users!');
                 }
-            } else {
-                console.log('Email is empty!'); // Debug
             }
         }
 
         // Add event listener to save button
         saveBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            console.log('Save button event triggered'); // Debug
             saveUser();
         });
 
@@ -950,7 +932,6 @@
                 updateConsultantSelect();
                 updateUserList();
                 
-                console.log('Users loaded from Supabase:', data);
             } catch (error) {
                 console.error('Error loading users:', error);
             }
@@ -969,7 +950,6 @@
                     return false;
                 }
                 
-                console.log('User saved to Supabase:', data);
                 return true;
             } catch (error) {
                 console.error('Error saving user:', error);
@@ -989,7 +969,6 @@
                     return false;
                 }
                 
-                console.log('User deleted from Supabase:', name);
                 return true;
             } catch (error) {
                 console.error('Error deleting user:', error);
@@ -1036,7 +1015,6 @@
                         await supabase
                             .from('users')
                             .insert([user]);
-                        console.log('Added default user:', user.name);
                     }
                 }
             } catch (error) {
@@ -1051,7 +1029,6 @@
             });
         });
         
-        // Auto-save functionality removed for fresh start on reload
     </script>
 </body>
 </html>
