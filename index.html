@@ -223,6 +223,12 @@
             color: #ef4444;
         }
 
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
         .add-user-btn {
             background: #f8fafc;
             color: #1e293b;
@@ -233,8 +239,7 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 8px;
-            width: 100%;
+            flex: 1;
         }
 
         .add-user-btn:hover {
@@ -252,8 +257,7 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 8px;
-            width: 100%;
+            flex: 1;
         }
 
         .manage-users-btn:hover {
@@ -457,8 +461,10 @@
                         <option value="Tobias Birzer">Tobias Birzer</option>
                         <option value="Nik Kremer">Nik Kremer</option>
                     </select>
-                    <button type="button" id="addUserBtn" class="add-user-btn">+ Neuen Benutzer</button>
-                    <button type="button" id="manageUsersBtn" class="manage-users-btn">Nutzer Verwalten</button>
+                    <div class="button-group">
+                        <button type="button" id="addUserBtn" class="add-user-btn">+ Neuen Benutzer</button>
+                        <button type="button" id="manageUsersBtn" class="manage-users-btn">Nutzer Verwalten</button>
+                    </div>
                     <div class="user-list" id="userList">
                         <!-- User list will be populated dynamically -->
                     </div>
