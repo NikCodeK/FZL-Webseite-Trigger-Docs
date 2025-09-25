@@ -427,25 +427,7 @@
             }
         });
 
-        // Auto-save to localStorage (optional)
-        const fields = ['content'];
-        fields.forEach(field => {
-            const element = document.getElementById(field);
-            
-            // Load saved data
-            const saved = localStorage.getItem(`fe_antrag_${field}`);
-            if (saved && element.value === '') {
-                element.value = saved;
-                if (field === 'content') {
-                    element.dispatchEvent(new Event('input'));
-                }
-            }
-            
-            // Save on input
-            element.addEventListener('input', function() {
-                localStorage.setItem(`fe_antrag_${field}`, this.value);
-            });
-        });
+        // Auto-save functionality removed for fresh start on reload
     </script>
 </body>
 </html>
