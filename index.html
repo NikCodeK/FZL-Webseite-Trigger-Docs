@@ -881,9 +881,12 @@
 
         // Save user function
         function saveUser() {
+            console.log('Save button clicked!'); // Debug
             if (userEmail.value.trim()) {
                 const fullName = `${firstName.value.trim()} ${lastName.value.trim()}`;
                 const email = userEmail.value.trim();
+                
+                console.log('Saving user:', fullName, email); // Debug
                 
                 // If editing, remove old entry
                 if (window.editingUser && window.editingUser !== fullName) {
@@ -912,14 +915,22 @@
                 // Clear editing state
                 window.editingUser = null;
                 
+                console.log('Going to step 3'); // Debug
+                
                 // Go to success step
                 step2.classList.remove('active');
                 step3.classList.add('active');
+            } else {
+                console.log('Email is empty!'); // Debug
             }
         }
 
         // Add event listener to save button
-        saveBtn.addEventListener('click', saveUser);
+        saveBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Save button event triggered'); // Debug
+            saveUser();
+        });
 
         // Close success step
         closeSuccessBtn.addEventListener('click', function() {
