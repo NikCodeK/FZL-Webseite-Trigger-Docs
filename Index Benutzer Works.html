@@ -522,17 +522,9 @@
         </div>
     </div>
 
-    <!-- Supabase Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <script>
         // Konfiguration - n8n Webhook URL
         const WEBHOOK_URL = 'https://cleverfunding.app.n8n.cloud/webhook-test/fe-antrag-upload';
-        
-        // Supabase Konfiguration - HIER DEINE WERTE EINTRAGEN
-        const supabaseUrl = 'DEINE_SUPABASE_URL';
-        const supabaseKey = 'DEINE_SUPABASE_ANON_KEY';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
         
         // Initialize consultantEmails globally
         window.consultantEmails = {
@@ -844,36 +836,29 @@
         };
 
         // Delete user function
-        window.deleteUser = async function(name) {
+        window.deleteUser = function(name) {
             if (confirm(`Möchten Sie "${name}" wirklich löschen?`)) {
-                // Delete from Supabase
-                const success = await deleteUserFromSupabase(name);
+                // Remove from select dropdown
+                const option = consultantSelect.querySelector(`option[value="${name}"]`);
+                if (option) {
+                    option.remove();
+                }
                 
-                if (success) {
-                    // Remove from select dropdown
-                    const option = consultantSelect.querySelector(`option[value="${name}"]`);
-                    if (option) {
-                        option.remove();
-                    }
-                    
-                    // Remove from email mapping
-                    delete window.consultantEmails[name];
-                    
-                    // Update user list
-                    updateUserList();
-                    
-                    // Clear selection if deleted user was selected
-                    if (consultantSelect.value === name) {
-                        consultantSelect.value = '';
-                    }
-                } else {
-                    alert('Fehler beim Löschen des Users!');
+                // Remove from email mapping
+                delete window.consultantEmails[name];
+                
+                // Update user list
+                updateUserList();
+                
+                // Clear selection if deleted user was selected
+                if (consultantSelect.value === name) {
+                    consultantSelect.value = '';
                 }
             }
         };
 
         // Save user function
-        async function saveUser() {
+        function saveUser() {
             console.log('Save button clicked!'); // Debug
             if (userEmail.value.trim()) {
                 const fullName = `${firstName.value.trim()} ${lastName.value.trim()}`;
@@ -881,43 +866,38 @@
                 
                 console.log('Saving user:', fullName, email); // Debug
                 
-                // Save to Supabase
-                const success = await saveUserToSupabase(fullName, email);
-                
-                if (success) {
-                    // If editing, remove old entry
-                    if (window.editingUser && window.editingUser !== fullName) {
-                        await deleteUserFromSupabase(window.editingUser);
-                        const oldOption = consultantSelect.querySelector(`option[value="${window.editingUser}"]`);
-                        if (oldOption) {
-                            oldOption.remove();
-                        }
-                        delete window.consultantEmails[window.editingUser];
+                // If editing, remove old entry
+                if (window.editingUser && window.editingUser !== fullName) {
+                    const oldOption = consultantSelect.querySelector(`option[value="${window.editingUser}"]`);
+                    if (oldOption) {
+                        oldOption.remove();
                     }
-                    
-                    // Add/update in email mapping
-                    window.consultantEmails[fullName] = email;
-                    
-                    // Update select dropdown
-                    updateConsultantSelect();
-                    
-                    // Select the user
-                    consultantSelect.value = fullName;
-                    
-                    // Update user list
-                    updateUserList();
-                    
-                    // Clear editing state
-                    window.editingUser = null;
-                    
-                    console.log('Going to step 3'); // Debug
-                    
-                    // Go to success step
-                    step2.classList.remove('active');
-                    step3.classList.add('active');
-                } else {
-                    alert('Fehler beim Speichern des Users!');
+                    delete window.consultantEmails[window.editingUser];
                 }
+                
+                // Add/update in select dropdown
+                const option = document.createElement('option');
+                option.value = fullName;
+                option.textContent = fullName;
+                consultantSelect.appendChild(option);
+                
+                // Add/update in email mapping
+                window.consultantEmails[fullName] = email;
+                
+                // Select the user
+                consultantSelect.value = fullName;
+                
+                // Update user list
+                updateUserList();
+                
+                // Clear editing state
+                window.editingUser = null;
+                
+                console.log('Going to step 3'); // Debug
+                
+                // Go to success step
+                step2.classList.remove('active');
+                step3.classList.add('active');
             } else {
                 console.log('Email is empty!'); // Debug
             }
@@ -935,94 +915,6 @@
             closePopup();
         });
 
-        // Supabase Funktionen
-        async function loadUsersFromSupabase() {
-            try {
-                const { data, error } = await supabase
-                    .from('users')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                
-                if (error) {
-                    console.error('Error loading users:', error);
-                    return;
-                }
-                
-                // Update consultantEmails with data from Supabase
-                data.forEach(user => {
-                    window.consultantEmails[user.name] = user.email;
-                });
-                
-                // Update select dropdown
-                updateConsultantSelect();
-                updateUserList();
-                
-                console.log('Users loaded from Supabase:', data);
-            } catch (error) {
-                console.error('Error loading users:', error);
-            }
-        }
-        
-        async function saveUserToSupabase(name, email) {
-            try {
-                const { data, error } = await supabase
-                    .from('users')
-                    .insert([
-                        { name: name, email: email }
-                    ]);
-                
-                if (error) {
-                    console.error('Error saving user:', error);
-                    return false;
-                }
-                
-                console.log('User saved to Supabase:', data);
-                return true;
-            } catch (error) {
-                console.error('Error saving user:', error);
-                return false;
-            }
-        }
-        
-        async function deleteUserFromSupabase(name) {
-            try {
-                const { error } = await supabase
-                    .from('users')
-                    .delete()
-                    .eq('name', name);
-                
-                if (error) {
-                    console.error('Error deleting user:', error);
-                    return false;
-                }
-                
-                console.log('User deleted from Supabase:', name);
-                return true;
-            } catch (error) {
-                console.error('Error deleting user:', error);
-                return false;
-            }
-        }
-        
-        function updateConsultantSelect() {
-            // Clear existing options except the first one
-            const consultantSelect = document.getElementById('consultant');
-            consultantSelect.innerHTML = '<option value="">Wählen Sie einen Berater...</option>';
-            
-            // Add all users from consultantEmails
-            Object.keys(window.consultantEmails).forEach(name => {
-                const option = document.createElement('option');
-                option.value = name;
-                option.textContent = name;
-                consultantSelect.appendChild(option);
-            });
-        }
-        
-        // Load users when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            loadUsersFromSupabase();
-        });
-        
         // Auto-save functionality removed for fresh start on reload
     </script>
 </body>
